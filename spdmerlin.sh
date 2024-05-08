@@ -417,7 +417,7 @@ Create_Symlinks(){
 	ln -s "$SCRIPT_INTERFACES_USER"  "$SCRIPT_WEB_DIR/interfaces_user.htm" 2>/dev/null
 	ln -s "$SCRIPT_STORAGE_DIR/spdtitletext.js" "$SCRIPT_WEB_DIR/spdtitletext.js" 2>/dev/null
 	
-	FULL_IFACELIST="WAN VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
+	FULL_IFACELIST="WAN WAN2 VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
 	for IFACE_NAME in $FULL_IFACELIST; do
 		ln -s "$SCRIPT_STORAGE_DIR/lastx_${IFACE_NAME}.csv" "$SCRIPT_WEB_DIR/lastx_${IFACE_NAME}.htm"
 	done
@@ -710,6 +710,9 @@ Get_Interface_From_Name(){
 				IFACE="$(nvram get wan0_ifname)"
 			fi
 		;;
+		WAN2)
+			IFACE="$(nvram get wan1_ifname)"
+		;;	
 		VPNC1)
 			IFACE="tun11"
 		;;
@@ -1818,7 +1821,7 @@ Process_Upgrade(){
 		fi
 	fi
 	
-	FULL_IFACELIST="WAN VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
+	FULL_IFACELIST="WAN WAN2 VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
 	for IFACE_NAME in $FULL_IFACELIST; do
 		echo "CREATE TABLE IF NOT EXISTS [spdstats_$IFACE_NAME] ([StatID] INTEGER PRIMARY KEY NOT NULL,[Timestamp] NUMERIC NOT NULL,[Download] REAL NOT NULL,[Upload] REAL NOT NULL,[Latency] REAL,[Jitter] REAL,[PktLoss] REAL,[ResultURL] TEXT,[DataDownload] REAL NOT NULL,[DataUpload] REAL NOT NULL,[ServerID] TEXT,[ServerName] TEXT);" > /tmp/spdstats-upgrade.sql
 		"$SQLITE3_PATH" "$SCRIPT_STORAGE_DIR/spdstats.db" < /tmp/spdstats-upgrade.sql
@@ -1827,7 +1830,7 @@ Process_Upgrade(){
 	if [ ! -f "$SCRIPT_STORAGE_DIR/.databaseupgraded" ]; then
 		renice 15 $$
 		Print_Output true "Upgrading database..." "$PASS"
-		FULL_IFACELIST="WAN VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
+		FULL_IFACELIST="WAN WAN2 VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
 		for IFACE_NAME in $FULL_IFACELIST; do
 			echo "PRAGMA cache_size=-20000; CREATE INDEX IF NOT EXISTS idx_${IFACE_NAME}_download ON spdstats_${IFACE_NAME} (Timestamp,Download);" > /tmp/spdstats-upgrade.sql
 			"$SQLITE3_PATH" "$SCRIPT_STORAGE_DIR/spdstats.db" < /tmp/spdstats-upgrade.sql
@@ -1865,7 +1868,7 @@ Process_Upgrade(){
 
 #$1 iface name
 Generate_LastXResults(){
-	FULL_IFACELIST="WAN VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
+	FULL_IFACELIST="WAN WAN2 VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
 	for IFACE_NAME in $FULL_IFACELIST; do
 		rm -f "$SCRIPT_STORAGE_DIR/lastx_${IFACE_NAME}.htm"
 	done
@@ -2043,7 +2046,7 @@ Reset_DB(){
 			Print_Output true "Database backup failed, please check storage device" "$WARN"
 		fi
 		
-		tablelist="WAN VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
+		tablelist="WAN WAN2 VPNC1 VPNC2 VPNC3 VPNC4 VPNC5"
 		for dbtable in $tablelist; do
 			echo "DELETE FROM [spdstats_$dbtable];" > /tmp/spd-stats.sql
 			"$SQLITE3_PATH" "$SCRIPT_STORAGE_DIR/spdstats.db" < /tmp/spd-stats.sql
