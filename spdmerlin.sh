@@ -371,7 +371,8 @@ Create_Dirs(){
 
 Create_Symlinks(){
 	printf "WAN\\n" > "$SCRIPT_INTERFACES"
-	
+	printf "WAN2\\n" > "$SCRIPT_INTERFACES"
+ 
 	for index in 1 2 3 4 5; do
 		comment=""
 		if [ ! -f "/sys/class/net/tun1$index/operstate" ] || [ "$(cat "/sys/class/net/tun1$index/operstate")" = "down" ]; then
@@ -486,6 +487,7 @@ Interfaces_FromSettings(){
 			sed -i "\\~spdmerlin_ifaces_enabled~d" "$SETTINGSFILE"
 			
 			printf "WAN #excluded#\\n" > "$SCRIPT_INTERFACES"
+   			printf "WAN2 #excluded#\\n" > "$SCRIPT_INTERFACES"
 			
 			for index in 1 2 3 4 5; do
 				comment=" #excluded#"
@@ -581,6 +583,7 @@ Conf_Exists(){
 		return 0
 	else
 		{ echo "PREFERREDSERVER_WAN=0|None configured"; echo "USEPREFERRED_WAN=false"; echo "AUTOMATED=true" ; echo "OUTPUTTIMEMODE=unix"; echo "STORAGELOCATION=jffs"; } >> "$SCRIPT_CONF"
+  		{ echo "PREFERREDSERVER_WAN2=0|None configured"; echo "USEPREFERRED_WAN2=false"; echo "AUTOMATED=true" ; echo "OUTPUTTIMEMODE=unix"; echo "STORAGELOCATION=jffs"; } >> "$SCRIPT_CONF"
 		for index in 1 2 3 4 5; do
 			{ echo "PREFERREDSERVER_VPNC$index=0|None configured"; echo "USEPREFERRED_VPNC$index=false"; } >> "$SCRIPT_CONF"
 		done
@@ -2428,6 +2431,8 @@ Menu_Install(){
 	Process_Upgrade
 	
 	Run_Speedtest auto WAN
+
+ 	Run_Speedtest auto WAN2
 	
 	Clear_Lock
 	
@@ -3382,6 +3387,7 @@ Menu_AutoBW_Update(){
 			echo ".headers off"
 			echo ".output /tmp/spdbw$metric"
 			echo "SELECT avg($metric) FROM (SELECT $metric FROM spdstats_WAN ORDER BY [Timestamp] DESC LIMIT $avgcalc);"
+   			echo "SELECT avg($metric) FROM (SELECT $metric FROM spdstats_WAN2 ORDER BY [Timestamp] DESC LIMIT $avgcalc);"
 		} > /tmp/spd-autobw.sql
 		"$SQLITE3_PATH" "$SCRIPT_STORAGE_DIR/spdstats.db" < /tmp/spd-autobw.sql
 		rm -f /tmp/spd-autobw.sql
